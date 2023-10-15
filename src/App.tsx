@@ -1,9 +1,7 @@
-import AntdBmpn from "./AntdBpmn";
+import AntdBpmn from "./AntdBpmn";
 
 function App() {
-
-    return <AntdBmpn />;
-
+    return <AntdBpmn />;
 }
 
 export default App
