@@ -1,4 +1,4 @@
-# Antd-Bpmn
+# Antd-bpmn
 
 一个基于 React + Ant.design + bpmn.js 编写的工作流高阶组件。
 
@@ -13,7 +13,18 @@
 - [x] 放大、缩小
 - [x] 撤销、重做
 - [x] 快捷键
+- [ ] 属性面板的设置（进行中...）
 
+### 运行测试
+
+```shell
+git clone https://gitee.com/antdadmin/antd-bpmn.git
+
+npm install
+npm run dev
+```
+
+> Antd-bpmn 需要等第一个版本 release 后，才会发布到 NPM 仓库。
 
 ### AntdAdmin 介绍
 
