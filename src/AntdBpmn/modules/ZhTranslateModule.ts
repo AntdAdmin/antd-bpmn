@@ -226,6 +226,8 @@ var zhConfigs = {
     'Sequence Flow': '顺序流',
     'Conditional Flow': '条件顺序流',
     'Change element': '切换节点',
+    'Open minimap': '打开小地图',
+    'Close minimap': '关闭小地图',
 
 } as any;
 
