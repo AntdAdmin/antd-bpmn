@@ -9,6 +9,7 @@ import {Col, Row} from "antd";
 import Toolbar from "./Toolbar";
 import PropertiesPanel, {Element} from "./PropertiesPanel";
 import {zhTranslateModule} from "./modules/ZhTranslateModule";
+import {myPalette} from "./modules/MyPaletteProvider";
 
 function AntdBpmn() {
 
@@ -22,9 +23,11 @@ function AntdBpmn() {
 
     useEffect(() => {
         if (!!xml && containerRef.current) {
+
+
             const bm = new BpmnModeler({
                 container: containerRef.current,
-                additionalModules: [zhTranslateModule],
+                additionalModules: [zhTranslateModule, myPalette],
                 keyboard: {
                     bindTo: document
                 }
