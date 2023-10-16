@@ -16,6 +16,10 @@ type GlobalConnect = import('diagram-js/lib/features/global-connect/GlobalConnec
 export type Translate = typeof import("diagram-js/lib/i18n/translate/translate").default;
 type PaletteEntries = import('diagram-js/lib/features/palette/Palette').PaletteEntries;
 
+import {
+    assign,
+} from 'min-dash';
+
 class MyPaletteProvider extends PaletteProvider {
 
     static $inject = [
@@ -38,16 +42,6 @@ class MyPaletteProvider extends PaletteProvider {
     _globalConnect: GlobalConnect;
     _translate: Translate;
 
-    /**
-     * @param palette
-     * @param create
-     * @param elementFactory
-     * @param spaceTool
-     * @param lassoTool
-     * @param handTool
-     * @param globalConnect
-     * @param translate
-     */
     constructor(palette: Palette, create: Create, elementFactory: ElementFactory, spaceTool: SpaceTool, lassoTool: LassoTool
         , handTool: HandTool, globalConnect: GlobalConnect, translate: Translate) {
         super(palette, create, elementFactory, spaceTool, lassoTool, handTool, globalConnect, translate);
@@ -60,9 +54,6 @@ class MyPaletteProvider extends PaletteProvider {
         this._handTool = handTool;
         this._globalConnect = globalConnect;
         this._translate = translate;
-
-        //注册当前的 provider
-        palette.registerProvider(this);
     }
 
     getPaletteEntries(): PaletteEntries {
@@ -79,7 +70,7 @@ class MyPaletteProvider extends PaletteProvider {
         function createAction(type: string, group: string, className: string, title: string, options?: any) {
 
             function createListener(event: any) {
-                const shape: any = elementFactory.createShape(Object.assign({type: type}, options));
+                const shape: any = elementFactory.createShape(assign({type: type}, options));
 
                 if (options) {
                     const di = getDi(shape);
@@ -128,7 +119,7 @@ class MyPaletteProvider extends PaletteProvider {
             create.start(event, elementFactory.createParticipantShape(), null);
         }
 
-        Object.assign(actions, {
+        assign(actions, {
             'hand-tool': {
                 group: 'tools',
                 className: 'bpmn-icon-hand-tool',

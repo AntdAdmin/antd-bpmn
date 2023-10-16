@@ -10,6 +10,7 @@ import Toolbar from "./Toolbar";
 import PropertiesPanel, {Element} from "./PropertiesPanel";
 import {zhTranslateModule} from "./modules/ZhTranslateModule";
 import {myPalette} from "./modules/MyPaletteProvider";
+import {myContextPad} from "./modules/MyContextPadProvider";
 
 function AntdBpmn() {
 
@@ -23,11 +24,9 @@ function AntdBpmn() {
 
     useEffect(() => {
         if (!!xml && containerRef.current) {
-
-
             const bm = new BpmnModeler({
                 container: containerRef.current,
-                additionalModules: [zhTranslateModule, myPalette],
+                additionalModules: [zhTranslateModule, myPalette, myContextPad],
                 keyboard: {
                     bindTo: document
                 }
