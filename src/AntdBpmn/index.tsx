@@ -7,10 +7,19 @@ import styles from "./antdbpmn.module.scss";
 
 import {Col, Row} from "antd";
 import Toolbar from "./Toolbar";
-import PropertiesPanel, {Element} from "./PropertiesPanel";
+import PropertiesPanel from "./PropertiesPanel";
 import {zhTranslateModule} from "./modules/ZhTranslateModule";
 import {myPalette} from "./modules/MyPaletteProvider";
 import {myContextPad} from "./modules/MyContextPadProvider";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import minimapModule from 'diagram-js-minimap';
+// 小地图
+import "diagram-js-minimap/assets/diagram-js-minimap.css";
+
+import {flowableDescriptor} from "./descriptors/flowableDescriptor";
+
+type Element = import('bpmn-js/lib/model/Types').Element;
 
 function AntdBpmn() {
 
@@ -26,10 +35,17 @@ function AntdBpmn() {
         if (!!xml && containerRef.current) {
             const bm = new BpmnModeler({
                 container: containerRef.current,
-                additionalModules: [zhTranslateModule, myPalette, myContextPad],
+                additionalModules: [zhTranslateModule, myPalette, myContextPad, minimapModule],
+                moddleExtensions:{
+                    flowable: flowableDescriptor,
+                },
                 keyboard: {
                     bindTo: document
-                }
+                },
+                // minimap:{
+                //     open:true
+                // },
+
             });
 
             bm.on("import.done", () => {
