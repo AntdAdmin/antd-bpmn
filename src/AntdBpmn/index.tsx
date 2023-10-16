@@ -8,6 +8,7 @@ import styles from "./antdbpmn.module.scss";
 import {Col, Row} from "antd";
 import Toolbar from "./Toolbar";
 import PropertiesPanel, {Element} from "./PropertiesPanel";
+import {zhTranslateModule} from "./modules/ZhTranslateModule";
 
 function AntdBpmn() {
 
@@ -23,6 +24,7 @@ function AntdBpmn() {
         if (!!xml && containerRef.current) {
             const bm = new BpmnModeler({
                 container: containerRef.current,
+                additionalModules: [zhTranslateModule],
                 keyboard: {
                     bindTo: document
                 }
