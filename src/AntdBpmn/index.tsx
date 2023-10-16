@@ -42,6 +42,20 @@ function AntdBpmn() {
                 keyboard: {
                     bindTo: document
                 },
+                bpmnRenderer: {
+                    defaultLabelColor:"#000",
+                    defaultFillColor: '#eef4ff',
+                    defaultStrokeColor: '#349afa'
+                },
+                textRenderer: {
+                    defaultStyle: {
+                        fontFamily: '"Inter, system-ui, Avenir, Helvetica, Arial, sans-serif"',
+                        // fontFamily: string;
+                        fontSize: "14px",
+                        fontWeight: 400,
+                        lineHeight: "20px",
+                    }
+                },
                 // minimap:{
                 //     open:true
                 // },
@@ -83,7 +97,7 @@ function AntdBpmn() {
                     {modeler && <Toolbar modeler={modeler}/>}
                 </div>
                 <div id={"container"} className={styles.container} ref={containerRef}
-                     style={{width: "100%", height: "100%"}}/>
+                     style={{width: "100%", height: "620px"}}/>
             </Col>
             <Col span={6}>
                 {modeler && <PropertiesPanel modeler={modeler} defaultElement={defaultElement!}/>}

@@ -63,6 +63,8 @@ const PropertiesPanel: React.FC<{
         setId(element.businessObject.id)
         setName(element.businessObject.name)
 
+        console.log("changeCurrentElement: ",element)
+
         if (element.businessObject?.$type.endsWith("UserTask")) {
             setShowUserProperties(true);
         } else {
