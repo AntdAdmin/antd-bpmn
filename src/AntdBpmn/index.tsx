@@ -36,14 +36,14 @@ function AntdBpmn() {
             const bm = new BpmnModeler({
                 container: containerRef.current,
                 additionalModules: [zhTranslateModule, myPalette, myContextPad, minimapModule],
-                moddleExtensions:{
+                moddleExtensions: {
                     flowable: flowableDescriptor,
                 },
                 keyboard: {
                     bindTo: document
                 },
                 bpmnRenderer: {
-                    defaultLabelColor:"#000",
+                    defaultLabelColor: "#000",
                     defaultFillColor: '#eef4ff',
                     defaultStrokeColor: '#349afa'
                 },
@@ -64,7 +64,7 @@ function AntdBpmn() {
 
             bm.on("import.done", () => {
                 const canvas: any = bm.get('canvas');
-                canvas.zoom('fit-viewport');
+                canvas.zoom('fit-viewport', 'auto');
                 const el = canvas.getRootElement();
                 setDefaultElement(el);
             });
