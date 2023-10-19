@@ -31,6 +31,9 @@ export type AntdBpmnConfig = {
 
     //部门数据的 URL
     deptDataUrl?: string,
+
+    //xml 加载 url
+    xmlDataUrl?:string
 }
 
 
@@ -98,14 +101,11 @@ const AntdBpmn: React.FC<{
         }
     }, [xml]);
 
+    useEffect(()=>{
+        config.onLoad(config.xmlDataUrl!,setXml);
+    },[])
 
-    if (!xml) {
-        // fetch("https://raw.githubusercontent.com/bpmn-io/react-bpmn/main/example/public/diagram.bpmn")
-        fetch("bpmn.demo.xml")
-            .then(response => response.text())
-            .then(text => setXml(text))
-            .catch(err => console.log(err));
-    }
+
 
     return (
         <Row>

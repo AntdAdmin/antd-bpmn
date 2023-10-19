@@ -23,13 +23,22 @@
 function App() {
     const config: AntdBpmnConfig = {
         deptDataUrl: "/xxxx",
+        deptDataUrl: "bpmn.demo.xml",
         onLoad: (url, set) => {
             console.log("onLoad", url)
-            set([
-                {value: 'dept1', label: '北京分公司'},
-                {value: 'dept2', label: '上海分公司'},
-                {value: 'dept3', label: '-- 上海研发部'},
-            ])
+            // 加载 xml 数据
+            if (url === "bpmn.demo.xml") {
+                fetch(url).then(response => set(response.text()))
+                    .catch(err => console.log(err));
+            }
+            // 加载部门数据
+            else {
+                set([
+                    {value: 'dept1', label: '北京分公司'},
+                    {value: 'dept2', label: '上海分公司'},
+                    {value: 'dept3', label: '-- 上海研发部'},
+                ])
+            }
         },
 
         onChooseAssignee: (set) => {
@@ -42,6 +51,7 @@ function App() {
 
 **AntdBpmnConfig** 说明：
 
+- xmlDataUrl: 获取 bpmn xml 数据的 URL
 - deptDataUrl: 获取部门数据的 URL
 - onLoad: 监听加载网络数据，数据加载完毕后通过第二个参数 `set` 方法来设置
 - onChooseAssignee: 监听选择用户操作，选择用户后通过第二个参数 `set` 方法来设置
