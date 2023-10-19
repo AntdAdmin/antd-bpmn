@@ -11,6 +11,7 @@ import PropertiesPanel from "./PropertiesPanel";
 import {zhTranslateModule} from "./modules/ZhTranslateModule";
 import {myPalette} from "./modules/MyPaletteProvider";
 import {myContextPad} from "./modules/MyContextPadProvider";
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import minimapModule from 'diagram-js-minimap';
@@ -21,7 +22,23 @@ import {flowableDescriptor} from "./descriptors/flowableDescriptor";
 
 type Element = import('bpmn-js/lib/model/Types').Element;
 
-function AntdBpmn() {
+export type AntdBpmnConfig = {
+    //加载数据
+    onLoad: (url: string, set: (data: any) => void) => void,
+
+    //现在用户触发器
+    onChooseAssignee: (set: (id: any, nickName: string) => void) => void,
+
+    //部门数据的 URL
+    deptDataUrl?: string,
+}
+
+
+const AntdBpmn: React.FC<{
+    attrPrefix?: string,
+    config: AntdBpmnConfig,
+}> = ({attrPrefix = "flowable:", config}) => {
+
 
     const [xml, setXml] = useState<string | null>(null);
     const containerRef = useRef(null);
@@ -100,7 +117,9 @@ function AntdBpmn() {
                      style={{width: "100%", height: "620px"}}/>
             </Col>
             <Col span={6}>
-                {modeler && <PropertiesPanel modeler={modeler} defaultElement={defaultElement!}/>}
+                {modeler && <PropertiesPanel attrPrefix={attrPrefix} config={config}
+                                             modeler={modeler} defaultElement={defaultElement!}/>
+                }
             </Col>
         </Row>
     );

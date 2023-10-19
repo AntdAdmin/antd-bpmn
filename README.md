@@ -15,9 +15,40 @@
 - [x] 小地图、快捷键
 - [x] 重写工具栏（更符合国人习惯）
 - [x] 重写元素菜单（更符合国人习惯）
-- [ ] 属性面板的设置（进行中...）
+- [x] 属性面板的设置
 
-### 操作功能
+### 如何使用
+
+```tsx
+function App() {
+    const config: AntdBpmnConfig = {
+        deptDataUrl: "/xxxx",
+        onLoad: (url, set) => {
+            console.log("onLoad", url)
+            set([
+                {value: 'dept1', label: '北京分公司'},
+                {value: 'dept2', label: '上海分公司'},
+                {value: 'dept3', label: '-- 上海研发部'},
+            ])
+        },
+
+        onChooseAssignee: (set) => {
+            set(Math.random(), "Michael");
+        },
+    };
+    return <AntdBpmn config={config}/>;
+}
+```
+
+**AntdBpmnConfig** 说明：
+
+- deptDataUrl: 获取部门数据的 URL
+- onLoad: 监听加载网络数据，数据加载完毕后通过第二个参数 `set` 方法来设置
+- onChooseAssignee: 监听选择用户操作，选择用户后通过第二个参数 `set` 方法来设置
+
+
+
+
 ### 运行测试
 
 ```shell

@@ -7,6 +7,7 @@ import Title from "antd/es/typography/Title";
 import Text from "antd/es/typography/Text";
 import TextArea from "antd/es/input/TextArea";
 import Link from "antd/es/typography/Link";
+import {AntdBpmnConfig} from "./index";
 
 type EventBus = import('diagram-js/lib/core/EventBus').default;
 type Modeling = import('bpmn-js/lib/features/modeling/Modeling').default;
@@ -25,18 +26,26 @@ type Element = import('bpmn-js/lib/model/Types').Element & {
             loopCardinality: any,
             collection: any,
             elementVariable: any,
-            completionCondition: any,
+            completionCondition: {
+                body: string,
+            },
         },
         $type: string,
         $attrs: any,
     }
 };
 
+type assigneeInfo = {
+    id: string,
+    nickName: string
+}
+
 const PropertiesPanel: React.FC<{
     modeler: BpmnModeler,
     defaultElement: Element,
     attrPrefix?: string,
-}> = ({modeler, defaultElement, attrPrefix = "flowable:"}) => {
+    config: AntdBpmnConfig,
+}> = ({modeler, defaultElement, attrPrefix = "flowable:", config}) => {
 
     const modeling: Modeling = modeler.get('modeling');
 
@@ -46,6 +55,18 @@ const PropertiesPanel: React.FC<{
     const [name, setName] = useState<string>(currentElement?.businessObject.name);
     const [conditionExpression, setConditionExpression] = useState<string>(currentElement?.businessObject.conditionExpression);
     const [actions, setActions] = useState<string[]>();
+    const [completionCondition, setCompletionCondition] = useState<string>();
+
+    const [assignee, setAssignee] = useState<string>();
+    const [assigneeName, setAssigneeName] = useState<string>('张三');
+
+    const [assignees, setAssignees] = useState<assigneeInfo[]>([]);
+    const [deptOptions, setDeptOptions] = useState<any[]>([]);
+
+    //加载部门数据
+    useEffect(() => {
+        config.onLoad(config.deptDataUrl!, setDeptOptions);
+    }, [])
 
     const [showUserProperties, setShowUserProperties] = useState<boolean>(false);
     const [showMultiInstancesProperties, setShowMultiInstancesProperties] = useState<boolean>(false);
@@ -65,15 +86,32 @@ const PropertiesPanel: React.FC<{
         setId(businessObject.id)
         setName(businessObject.name)
 
-        // 操作
+        // 操作按钮
         let actions = businessObject.$attrs[attrPrefix + "actions"];
         if (actions) {
             if (typeof actions === "string") {
                 actions = actions.split(",");
             }
             setActions(actions as string[]);
-        }else {
+        } else {
             setActions([]);
+        }
+
+        // 单操作用户
+        const assignee = businessObject.$attrs[attrPrefix + "assignee"];
+        if (assignee) {
+            setAssignee(assignee);
+        } else {
+            setAssignee(undefined);
+        }
+
+        // 多操作用户
+        const assignees = businessObject.$attrs[attrPrefix + "assignees"];
+        if (assignees) {
+            const assigneesObj = JSON.parse(assignees)
+            setAssignee(assigneesObj);
+        } else {
+            setAssignee(undefined);
         }
 
         //是否显示用户相关的属性
@@ -154,8 +192,20 @@ const PropertiesPanel: React.FC<{
 
 
     useEffect(() => {
+        updateElementProperty(attrPrefix + "assignee", assignee);
+    }, [assignee])
+
+
+    useEffect(() => {
+        const assigneesJson = JSON.stringify(assignees);
+        updateElementProperty(attrPrefix + "assignees", assigneesJson);
+    }, [assignees])
+
+
+    useEffect(() => {
         updateElementProperty("actions", actions, true);
     }, [actions])
+
 
     useEffect(() => {
         if (conditionExpression) {
@@ -168,6 +218,43 @@ const PropertiesPanel: React.FC<{
         }
     }, [conditionExpression])
 
+
+    useEffect(() => {
+        const bpmnFactory: BpmnFactory = modeler.get("bpmnFactory");
+        const expression = bpmnFactory.create("bpmn:Expression")
+        expression.body = completionCondition
+
+        const loopCharacteristics = currentElement.businessObject.loopCharacteristics;
+        if (loopCharacteristics) {
+            expression.$parent = loopCharacteristics;
+            loopCharacteristics.completionCondition = expression;
+        }
+
+        updateElementProperty("loopCharacteristics", loopCharacteristics)
+
+    }, [completionCondition])
+
+    function chooseAssignee(type: "single" | "multi") {
+        config.onChooseAssignee && config.onChooseAssignee((id, nickName) => {
+            switch (type) {
+                case "multi":
+                    setAssignees(assignees!.concat({
+                        id: id,
+                        nickName: nickName,
+                    }))
+                    break;
+                case "single":
+                    setAssignee(id);
+                    setAssigneeName(nickName);
+            }
+        })
+    }
+
+    function removeAssignee(id: any) {
+        setAssignees(assignees.filter((item) => {
+            return item.id != id;
+        }))
+    }
 
     return (
         <>
@@ -276,7 +363,8 @@ const PropertiesPanel: React.FC<{
                                 人员：
                             </Col>
                             <Col span={20}>
-                                <Input addonAfter={<UserAddOutlined/>} defaultValue="张三"/>
+                                <Input addonAfter={<UserAddOutlined onClick={() => chooseAssignee('single')}/>}
+                                       value={assigneeName} readOnly/>
                             </Col>
                         </Row>
 
@@ -285,10 +373,11 @@ const PropertiesPanel: React.FC<{
                                 部门：
                             </Col>
                             <Col span={20}>
-                                <Select placeholder="请选择部门" allowClear style={{width: "100%"}}>
-                                    <Select.Option value="china">China</Select.Option>
-                                    <Select.Option value="usa">U.S.A</Select.Option>
-                                </Select>
+                                <Select placeholder="请选择部门" allowClear style={{width: "100%"}}
+                                        options={deptOptions}/>
+                                {/*    <Select.Option value="china">China</Select.Option>*/}
+                                {/*    <Select.Option value="usa">U.S.A</Select.Option>*/}
+                                {/*</Select>*/}
                             </Col>
                         </Row>
                     </>}
@@ -307,81 +396,25 @@ const PropertiesPanel: React.FC<{
                         </Col>
                         <Col span={20}>
                             <Row gutter={[4, 4]}>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#4c80e7'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#87d068'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#87d068'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#87d068'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#87d068'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#87d068'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#87d068'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
-                                <Col span={4}>
-                                    <a onClick={() => {
-                                        alert("xxx")
-                                    }}>
-                                        <Badge count={'-'} size={"small"}>
-                                            <Avatar style={{backgroundColor: '#87d068'}} icon={<UserOutlined/>}/>
-                                        </Badge>
-                                    </a>
-                                </Col>
+
+                                {assignees && assignees.map((item) => {
+                                    return (
+                                        <Col span={4}>
+                                            <a onClick={() => {
+                                                removeAssignee(item.id);
+                                            }}>
+                                                <Badge count={'-'} size={"small"}>
+                                                    <Avatar style={{backgroundColor: '#4c80e7'}}
+                                                            icon={<UserOutlined/>}/>
+                                                </Badge>
+                                            </a>
+                                        </Col>
+                                    )
+                                })}
 
                                 <Col span={4}>
-                                    <Button type="dashed" shape="circle" icon={<PlusOutlined/>}/>
+                                    <Button type="dashed" shape="circle" icon={<PlusOutlined/>}
+                                            onClick={() => chooseAssignee('multi')}/>
                                 </Col>
 
                             </Row>
@@ -394,7 +427,8 @@ const PropertiesPanel: React.FC<{
                             完成：
                         </Col>
                         <Col span={20}>
-                            <TextArea rows={3} value={name} onChange={(e) => setName(e.target.value)}/>
+                            <TextArea rows={3} value={completionCondition}
+                                      onChange={(e) => setCompletionCondition(e.target.value)}/>
                             <Text type="secondary">完成条件表达式，请参考：
                                 <Link onClick={() => {
                                     alert("here")
