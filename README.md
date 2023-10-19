@@ -19,6 +19,14 @@
 
 ### 如何使用
 
+安装：
+
+```shell
+npm i @codeflex/antd-bpmn
+```
+
+示例代码：
+
 ```tsx
 function App() {
     const config: AntdBpmnConfig = {
